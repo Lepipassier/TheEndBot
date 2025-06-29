@@ -3,8 +3,8 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
-from keep_alive import keep_alive
 import json
+from keep_alive import keep_alive
 
 load_dotenv()
 
@@ -15,37 +15,32 @@ ACCEPT_ROLE_ID = int(os.getenv('ACCEPT_ROLE_ID'))
 
 DATA_FILE = 'data.json'
 
-# Fonction pour charger les données, crée le fichier si absent ou corrompu
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             try:
                 data = json.load(f)
-                # S'assurer que 'acceptance_number' existe, sinon l'initialiser
                 if "acceptance_number" not in data:
                     data["acceptance_number"] = 0
-                    save_data(data) # Sauvegarder la correction
+                    save_data(data)
                 return data
             except json.JSONDecodeError:
                 print(f"Erreur de décodage JSON dans {DATA_FILE}. Le fichier sera réinitialisé.")
-                # Créer un fichier avec les données par défaut
                 default_data = {"acceptance_number": 0}
                 save_data(default_data)
                 return default_data
     else:
         print(f"Fichier {DATA_FILE} non trouvé. Création avec les données par défaut.")
         default_data = {"acceptance_number": 0}
-        save_data(default_data) # Créer le fichier
+        save_data(default_data)
         return default_data
 
-# Fonction pour sauvegarder les données
 def save_data(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
-# Charger les données au démarrage du script
 bot_data = load_data()
-acceptance_number = bot_data["acceptance_number"] # Maintenant on est sûr que la clé existe
+acceptance_number = bot_data["acceptance_number"]
 
 intents = discord.Intents.default()
 intents.members = True
@@ -221,8 +216,8 @@ async def on_raw_reaction_add(payload):
                 
                 global acceptance_number
                 acceptance_number += 1
-                bot_data["acceptance_number"] = acceptance_number # Mise à jour dans le dict
-                save_data(bot_data) # Sauvegarde du dict mis à jour
+                bot_data["acceptance_number"] = acceptance_number
+                save_data(bot_data)
 
                 log_channel = bot.get_channel(LOG_CHANNEL_ID)
                 if log_channel:
